@@ -1,0 +1,6 @@
+import os
+
+PARSE_APPLICATION_ID = "sYIULJPxHZCryGbqxbNfsXF8PPU4Blf4Ow5b8SFc"
+SECRETS = dict(
+    PARSE_REST_API_KEY=os.environ["PARSE_REST_API_KEY"],
+)
