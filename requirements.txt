@@ -1,11 +1,17 @@
+Flask==0.10.1
+Jinja2==2.8
+MarkupSafe==0.23
 Twisted==15.4.0
+Werkzeug==0.10.4
 argparse==1.2.1
 attrs==15.1.0
 cffi==1.2.1
 cryptography==1.0.2
 enum34==1.0.4
+gunicorn==19.3.0
 idna==2.0
 ipaddress==1.0.14
+itsdangerous==0.24
 mainland==0.0.1
 ncolony==0.0.2
 ndg-httpsclient==0.4.0
