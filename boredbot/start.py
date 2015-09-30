@@ -2,6 +2,8 @@ import os
 import shutil
 import sys
 
+from twisted.scripts import twistd
+
 from ncolony import ctllib
 
 def calcCommandline():
@@ -31,3 +33,5 @@ def main(args):
         os.mkdir(dr)
     cmdLine = calcCommandline()
     ctllib.add(places, 'boredbot', cmd=cmdLine[0], args=cmdLine[1:] + ['loop'], env=['PARSE_REST_API_KEY='+os.environ['PARSE_REST_API_KEY']])
+    sys.argv = ['twistd', '--nodaemon', 'ncolony', '--messages', messages, '--config', config]
+    twistd.run()
