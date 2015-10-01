@@ -1,8 +1,19 @@
 import flask
+import requests
+
+from boredbot import config
 
 app = flask.Flask('bored-web')
 
-BOREDBOT_MAIN_OK = True
+@app.route('/')
+def showEntries():
+    lines  = requests.get('https://api.parse.com/1/classes/lines', headers=config.HEADERS).json()['results']
+    output = ['<html><body><ul>']
+    for line in lines:
+        output.append('<li>%(status)s (%(updatedAt)s)</li>' % line)
+    output.append('</ul></body><html>')
+    return '\n'.join(output)
 
+BOREDBOT_MAIN_OK = True
 def main(dummyArgs):
-    app.run()
+    app.run(debug=True, use_debugger=False, use_reloader=False)
