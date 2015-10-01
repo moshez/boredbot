@@ -1,6 +1,7 @@
 Flask==0.10.1
 Jinja2==2.8
 MarkupSafe==0.23
+PyNaCl==0.3.0
 Twisted==15.4.0
 Werkzeug==0.10.4
 argparse==1.2.1
