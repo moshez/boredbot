@@ -8,7 +8,8 @@ app = flask.Flask('bored-web')
 @app.route('/')
 def showEntries():
     lines  = requests.get('https://api.parse.com/1/classes/lines', headers=config.HEADERS).json()['results']
-    output = ['<html><body><ul>']
+    status, = requests.get('https://api.parse.com/1/classes/current', headers=config.STATE_HEADERS).json()['results']
+    output = ['<html><body>%s<ul>' % status['feeling']]
     for line in lines:
         output.append('<li>%(status)s (%(updatedAt)s)</li>' % line)
     output.append('</ul></body><html>')
