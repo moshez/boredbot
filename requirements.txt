@@ -16,6 +16,7 @@ itsdangerous==0.24
 mainland==0.0.1
 ncolony==0.0.2
 ndg-httpsclient==0.4.0
+pex==1.0.3
 pyOpenSSL==0.15.1
 pyasn1==0.1.9
 pycparser==2.14
