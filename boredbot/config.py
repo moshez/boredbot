@@ -18,7 +18,6 @@ def getSecrets():
     global _DECRYPTED_SECRETS
     if _DECRYPTED_SECRETS == None:
         _DECRYPTED_SECRETS = crypto.decryptDict(_SECRETS, SIGNING_KEY, os.environ['SECRET_KEY'], PUBLIC_KEY)
-    print _DECRYPTED_SECRETS
     return _DECRYPTED_SECRETS
 
 def getHeaders():
