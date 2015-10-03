@@ -14,7 +14,7 @@ def buildPEX():
     if os.path.exists('build/boredbot.pex'):
         os.remove('build/boredbot.pex')
     subprocess.check_call(['pex', '--repo', 'build/wheelhouse', '--no-index', '--output-file', 'build/boredbot.pex',
-                           '--requirement', 'requirements.txt', 'boredbot', '--entry-point', 'boredbot'])
+                           '--disable-cache', '--requirement', 'requirements.txt', 'boredbot', '--entry-point', 'boredbot'])
 
 BOREDBOT_MAIN_OK = True
 def main(dummyArgs):
