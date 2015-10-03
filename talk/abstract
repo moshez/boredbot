@@ -1,0 +1,12 @@
+BoredBot is a minimal Python application which showcases several of the
+typical complications that make applications interesting to install --
+hooking up to several API endpoints, depending on double-digit third
+party packages and requiring several interacting processes.
+
+The talk shows, step by step, how to start from the application code,
+and how to add deployment-friendly features, until it gets to reliable
+builds and dependable deployments to targets such us Amazon ECS
+or Google Compute Cloud. It assumes code on GitHub and images on
+image stores like DockerHub or Bitnami will get leaked, that
+PyPI will be down when you need it the most and that processes
+crash.
