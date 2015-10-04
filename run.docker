@@ -1,0 +1,8 @@
+FROM google/python
+
+RUN apt-get install libffi5
+
+RUN mkdir /opt/boredbot
+ADD build/boredbot.pex /opt/boredbot/
+
+ENTRYPOINT ["/opt/boredbot/boredbot.pex", "start"]

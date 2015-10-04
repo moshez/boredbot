@@ -1,0 +1,6 @@
+#!/bin/sh
+mkdir -p build
+rm -f build/boredbot.pex
+docker build -t build-boredbot -f build.docker . 
+docker run --rm -it -v `pwd`/build:/output build-boredbot bash -c '. ./build/bin/activate; cd src/; python -m boredbot mkpex; cp build/boredbot.pex /output' 
+docker build -t boredbot -f run.docker .

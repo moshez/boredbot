@@ -1,0 +1,11 @@
+FROM google/python
+
+RUN apt-get install -y python-dev libffi-dev
+
+RUN virtualenv /build
+RUN /build/bin/pip install --upgrade pip mainland pex wheel requests[security]
+
+RUN mkdir -p /src/boredbot/
+ADD boredbot/*.py /src/boredbot/
+ADD setup.py /src/
+ADD requirements.txt /src/
