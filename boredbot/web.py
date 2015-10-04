@@ -14,7 +14,3 @@ def showEntries():
         output.append('<li>%(status)s (%(updatedAt)s)</li>' % line)
     output.append('</ul></body><html>')
     return '\n'.join(output)
-
-BOREDBOT_MAIN_OK = True
-def main(dummyArgs):
-    app.run(debug=True, use_debugger=False, use_reloader=False)
