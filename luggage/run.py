@@ -2,8 +2,6 @@ import os
 import shutil
 import sys
 
-from twisted.scripts import twistd
-
 from ncolony import ctllib
 
 def calcCommandline():
@@ -20,9 +18,8 @@ def calcCommandline():
     module = '.'.join(argv0[len(prefix):].split('/')[1:-1])
     return [sys.executable, '-m', module]
 
-BOREDBOT_MAIN_OK = True
-def main(args):
-    place = os.path.abspath('boredbot-config')
+def mkconfig(dirname):
+    place = os.path.abspath(dirname)
     if os.path.exists(place):
         shutil.rmtree(place)
     os.mkdir(place)
@@ -31,10 +28,4 @@ def main(args):
     places = ctllib.Places(config=config, messages=messages)
     for dr in places:
         os.mkdir(dr)
-    cmdLine = calcCommandline()
-    ctllib.add(places, 'boredbot', cmd=cmdLine[0], args=cmdLine[1:] + ['loop'],
-               env=['SECRET_KEY='+os.environ['SECRET_KEY']])
-    ctllib.add(places, 'boredweb', cmd=cmdLine[0], args=cmdLine[1:] + ['gunicorn', '-w', '4', 'boredbot.web:app'],
-               env=['SECRET_KEY='+os.environ['SECRET_KEY']])
-    sys.argv = ['twistd', '--nodaemon', 'ncolony', '--messages', messages, '--config', config]
-    twistd.run()
+    return places

@@ -5,7 +5,7 @@ import sys
 import mainland
 
 mainland.main(
-    root='boredbot',
+    root='boredbot_deploy',
     marker='BOREDBOT_MAIN_OK',
     argv=sys.argv,
 )

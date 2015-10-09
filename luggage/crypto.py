@@ -1,6 +1,9 @@
 import base64
+import os
 
 import six
+
+import attr
 
 from nacl import utils as nutils, public as npublic
 
@@ -29,8 +32,16 @@ def encrypt(value, signingPrivateKey, realPublicKey):
     oneline = ''.join(encoded.splitlines())
     return oneline
 
-BOREDBOT_MAIN_OK = True
-def main(args):
-    from boredbot import config
-    result = encrypt(args[1], config.SIGNING_KEY, config.PUBLIC_KEY)
-    print(result)
+
+@attr.s
+class Secrets(object):
+    envVar = attr.ib()
+    encSecrets = attr.ib()
+    signingKey = attr.ib()
+    publicKey = attr.ib()
+    _cache = None
+
+    def get(self):
+        if self._cache == None:
+            self._cache = decryptDict(self.encSecrets, self.signingKey, os.environ[self.envVar], self.publicKey)
+        return self._cache
