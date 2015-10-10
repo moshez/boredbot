@@ -1,3 +1,4 @@
+## Standard mainland-ish __main__
 if __name__ != '__main__':
     raise ImportError('module cannot be imported')
 

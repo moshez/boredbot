@@ -1,6 +1,16 @@
 #!/bin/sh
+
+## Clean the environment.
 mkdir -p build
 rm -f build/boredbot.pex
+
+## Build the builder docker image.
 docker build -t build-boredbot -f build.docker . 
+
+## We need "activate" because mkpex calls "pip" and "pex" on the
+## PATH. Just running /build/bin/python is not enough.
+## This will leave a "boredbot.pex" in build/
 docker run --rm -it -v `pwd`/build:/output build-boredbot bash -c '. ./build/bin/activate; cd src/; python -m boredbot mkpex; cp build/boredbot.pex /output' 
+
+## Use the boredbot.pex to build the deployment docker image.
 docker build -t boredbot -f run.docker .

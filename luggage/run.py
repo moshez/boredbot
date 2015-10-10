@@ -5,6 +5,10 @@ import sys
 from ncolony import ctllib
 
 def calcCommandline():
+    """return a command-line prefix that will run me
+
+    :rettype: list of strings
+    """
     argv0 = sys.argv[0]
     if not argv0.endswith('__main__.py'):
         return [argv0]
@@ -19,6 +23,12 @@ def calcCommandline():
     return [sys.executable, '-m', module]
 
 def mkconfig(dirname):
+    """create an NColony configuration
+
+    :param dirname: directory in which to create the configuration
+    :type dirname: string
+    :rettype: ncolony.ctllib.Places
+    """
     place = os.path.abspath(dirname)
     if os.path.exists(place):
         shutil.rmtree(place)

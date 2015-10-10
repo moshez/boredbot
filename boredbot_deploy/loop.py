@@ -1,3 +1,6 @@
+## Simple main wrapper that takes the 
+## headers from the configuration and passes
+## them to the updating robot.
 from boredbot import update, parse
 from boredbot_deploy import config
 

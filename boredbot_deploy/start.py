@@ -1,3 +1,9 @@
+## Run NColony
+## Create an NColony configuration,
+## and then run the NColony service.
+## The configuration runs the update
+## robot, and uses gunicorn to run
+## the web UI with 4 threads.
 import os
 import sys
 

@@ -1,8 +1,15 @@
+## We need Python anyway,
+## might as well get an image
+## that contains it.
 FROM google/python
 
+## FFI runtime for all our FFI needs.
 RUN apt-get install libffi5
 
+## Put the PEX file in
 RUN mkdir /opt/boredbot
 ADD build/boredbot.pex /opt/boredbot/
 
+## Start has been optimized to be a useful
+## Docker entrypoint.
 ENTRYPOINT ["/opt/boredbot/boredbot.pex", "start"]

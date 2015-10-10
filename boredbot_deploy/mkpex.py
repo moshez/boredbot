@@ -1,3 +1,5 @@
+## Build a Pex from the requirements and the local 'boredbot' wheel
+## Behave as though it's running 'python -m boredbot_deploy'
 from luggage import buildpex
 
 BOREDBOT_MAIN_OK = True

@@ -1,3 +1,6 @@
+## WSGI configuration for web UI --
+## use the blueprint, and add the
+## configuration headers.
 import flask
 
 from boredbot import web, parse
