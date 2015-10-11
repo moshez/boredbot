@@ -10,6 +10,9 @@ RUN apt-get install libffi5
 RUN mkdir /opt/boredbot
 ADD build/boredbot.pex /opt/boredbot/
 
+## We are listening on port 8000
+EXPOSE 8000
+
 ## Start has been optimized to be a useful
 ## Docker entrypoint.
 ENTRYPOINT ["/opt/boredbot/boredbot.pex", "start"]

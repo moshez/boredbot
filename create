@@ -1,5 +1,8 @@
 #!/bin/sh
 
+TAG=$(git log -1 | head -1 | awk '{print $2}')
+echo $TAG
+
 ## Clean the environment.
 mkdir -p build
 rm -f build/boredbot.pex
@@ -10,7 +13,8 @@ docker build -t build-boredbot -f build.docker .
 ## We need "activate" because mkpex calls "pip" and "pex" on the
 ## PATH. Just running /build/bin/python is not enough.
 ## This will leave a "boredbot.pex" in build/
-docker run --rm -it -v `pwd`/build:/output build-boredbot bash -c '. ./build/bin/activate; cd src/; python -m boredbot mkpex; cp build/boredbot.pex /output' 
+docker run --rm -it -v `pwd`/build:/output build-boredbot bash -c '. ./build/bin/activate; cd src/; python -m boredbot_deploy mkpex; cp build/boredbot.pex /output'
 
 ## Use the boredbot.pex to build the deployment docker image.
-docker build -t boredbot -f run.docker .
+docker build -t moshez/boredbot:$TAG -f run.docker .
+docker tag -f moshez/boredbot:$TAG moshez/boredbot:latest

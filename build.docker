@@ -22,7 +22,7 @@ RUN /build/bin/pip install --upgrade pip mainland pex wheel requests[security]
 ## directory.
 RUN mkdir -p /src/boredbot/
 ADD boredbot/*.py /src/boredbot/
-ADD luggage/*.py /src/boredbot/
-ADD boredbot_deploy/*.py /src/boredbot/
+ADD luggage/*.py /src/luggage/
+ADD boredbot_deploy/*.py /src/boredbot_deploy/
 ADD setup.py /src/
 ADD requirements.txt /src/

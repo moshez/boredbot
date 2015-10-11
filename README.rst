@@ -90,6 +90,37 @@ The Configuration
 .. _Pex: https://pex.readthedocs.org/en/stable/
 .. _mainland: https://github.com/moshez/mainland/
 
+The Deployment
+~~~~~~~~~~~~~~
+
+After running "./create", use "docker push" to push the images to Docker Hub.
+The benefit of not keeping any unencrypted secrets in the Docker image is now apparent:
+even if Docker Hub is compromised, sensitive keys are not leaked.
+
+Now it is possible to run it anywhere, but for simplicity, here is how to use
+docker-machine_:
+
+.. code::
+
+    $ eval $(docker-machine env <Logical machine name>)
+    $ ## OK This is horrible. But hey, better than some used in real life!
+    $ docker rm -f $(docker ps | python -c 'import sys;print " ".join(x.split()[-1] for x in sys.stdin if x.split()[1].startswith("moshez/boredbot"))')
+    $ docker run --env SECRET_KEY=$(cat ../boredbot-secret-key)  -p 8000:8000  moshez/boredbot:latest
+
+Note that this will not work for you! Because you do not have the file "borebdot-secret-key".
+This is a feature, not a bug.
+If you really want to try it out for yourself,
+create a nacl secret key, put they public key in boredbot_deploy/config.py,
+create two Parse.com applications, and update the application ID and keys in
+boredbot_deploy/config.py.
+
+In a real environment, the boredbot-secret-key might be kept on an encrypted Amazon EBS volume,
+and mounted to a "beachhead" machine that deployers have access to.
+
+The snippet above might be run in a loop, deployed to several machines.
+
+.. _docker-machine: https://docs.docker.com/machine/get-started/
+
 .. rubric:: Footnotes
 
 .. [#writer] The writer of this README is an infrastructure engineer.
