@@ -7,7 +7,6 @@ FROM google/python
 RUN apt-get install libffi5
 
 ## Put the PEX file in
-RUN mkdir /opt/boredbot
 ADD build/boredbot.pex /opt/boredbot/
 
 ## We are listening on port 8000
