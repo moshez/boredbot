@@ -1,0 +1,623 @@
+<!doctype html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8">
+
+		<title>BoredBot -- Packaging Python Applications</title>
+		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/theme/default.css" id="theme">
+
+		<!-- For syntax highlighting -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<!-- If the query includes 'print-pdf', use the PDF print sheet -->
+		<script>
+			document.write( '<link rel="stylesheet" href="css/print/' + ( window.location.search.match( /print-pdf/gi ) ? 'pdf' : 'paper' ) + '.css" type="text/css" media="print">' );
+		</script>
+
+		<!--[if lt IE 9]>
+		<script src="lib/js/html5shiv.js"></script>
+		<![endif]-->
+	</head>
+
+	<body>
+
+<div class="reveal">
+
+<div class="slides">
+
+<section>
+<h1>Deploying a Bored Robot</h1>
+</section>
+
+<section>
+<h2>Deployment</h2>
+<ul style="list-style-type:none">
+<li>in me·di·as res
+<li>/in ˈmēdēəs ˈres,ˈmādēˌäs/
+    <ul style="list-style-type:none">
+    <li>adverb</li>
+    <li>into the middle of a narrative; without preamble.</li>
+    </ul>
+</li>
+</ul>
+</section>
+
+<section>
+<h2>Robot architecture</h2>
+<ul>
+<li class="fragment">Status updater (spoiler: it's bored)</li>
+<li class="fragment">Web UI</li>
+<li class="fragment">Parse.com (MongoDB in the cloud)</li>
+</ul>
+</section>
+
+<section>
+<h2>Updater</h2>
+<ul>
+<li class="fragment">Python script with loop/sleep</li>
+</ul>
+</section>
+
+<section>
+<h2>Updater code</h2>
+<pre class="fragment"><code>
+# boredbot/loop.py
+# ... imports ...
+def update(headers):
+    data = json.dumps(dict(status="I'm bored"))
+    requests.post('https://api.parse.com/1/classes/lines',
+                  data=data, headers=headers)
+def loop(headers):
+    while True:
+        update(headers)
+        time.sleep(10)
+</code></pre>
+</section>
+
+<section>
+<h2>Web UI</h2>
+<pre class="fragment"><code class="python">
+# boredbot/web.py
+# ... imports ...
+blueprint = flask.Blueprint('showbored', __name__)
+@blueprint.route('/')
+def showEntries():
+    headers = flask.current_app.config['headers']
+    stateHeaders = flask.current_app.config['stateHeaders']
+    lines  = requests.get('https://api.parse.com/1/classes/lines',
+                          headers=headers).json()['results']
+    status, = requests.get('https://api.parse.com/1/classes/current',
+                           headers=stateHeaders).json()['results']
+    output = ['&lt;html>&lt;body>%s&lt;ul>' % status['feeling']]
+    for line in lines:
+        output.append('&lt;li>%(status)s (%(updatedAt)s)&lt;/li>' % line)
+    output.append('&lt;/ul>&lt;/body>&lt;html>')
+    return '\n'.join(output)
+</code></pre>
+</section>
+
+<section>
+<h2>Parse helper</h2>
+
+<pre><code class="python">
+# boredbot/parse.py
+# ... imports ...
+def getHeaders(appID, restKey):
+    return {
+        "X-Parse-Application-Id": appID,
+        "X-Parse-REST-API-Key": restKey,
+        "Content-Type": "application/json",
+    }
+</code></pre>
+</section>
+
+<section>
+<h2>Notes</h2>
+
+<ul>
+<li class="fragment">Code works!</li>
+<li class="fragment">Not best practices!</li>
+<li class="fragment">Written to be deployment-friendly</li>
+</ul>
+</section>
+
+<section>
+<h2>Deployment-friendly</h2>
+
+<ul>
+<li class="fragment">Gets headers as arguments</li>
+<li class="fragment">Uses flask blueprints</li>
+</ul>
+</section>
+
+<section>
+<h2>Deployment goals</h2>
+
+<ul>
+<li class="fragment">Secure</li>
+<li class="fragment">Reliable</li>
+</ul>
+</section>
+
+<section>
+<h2>Stage 0 -- Running the processes</h2>
+</section>
+
+<section>
+<h2>python -m</h2>
+
+<ul>
+<li class="fragment"><code>python -m MODULE</code></li>
+<li class="fragment">Executes Python module</li>
+<li class="fragment">Based on <code>sys.path</code>, not <code>$PATH</code></li>
+<li class="fragment">Longer to type, <span class="fragment">so what?</span>
+<ul>
+</section>
+
+<section>
+<h2>python -m PACKAGE</h2>
+
+<ul>
+<li class="fragment"><code>python -m PACKAGE</code></li>
+<li class="fragment">Equivalent to <code>python -m PACKAGE.__main__</code></li>
+</ul>
+</section>
+
+<section>
+<h2>mainland</h2>
+
+<pre><code>
+# boredbot_deploy/__main__.py
+# ... imports ...
+mainland.main(
+    root='boredbot_deploy',
+    marker='BOREDBOT_MAIN_OK',
+    argv=sys.argv,
+)
+</code></pre>
+</section>
+
+<section>
+<h2>Loop</h2>
+
+<pre><code>
+# boredbot_deploy/loop.py
+# ... imports ...
+BOREDBOT_MAIN_OK = True
+def main(dummyArgs):
+    headers = parse.getHeaders("sYIULJPxHZCryGbqxbNfs"
+                               "XF8PPU4Blf4Ow5b8SFc",
+                               "CENSORED -- SECRET DATA")
+    update.loop(headers)
+</code></pre>
+</section>
+
+<section>
+<h2>Web UI</h2>
+
+<pre><code>
+# boredbot_deploy/wsgi.py
+# ... imports...
+app = flask.Flask(__name__)
+app.config['headers'] = parse.getHeaders("sYIULJPxHZCryGbqxbNfs"
+                                         "XF8PPU4Blf4Ow5b8SFc",
+                                         "CENSORED -- SECRET DATA")
+app.config['stateHeaders'] = parse.getHeaders("jcMhpH2gLjin9TK3oQH2"
+                                              "5Nn4kOG1XQHE8K0WmySL",
+                                             "CENSORED -- SECRET DATA")
+app.register_blueprint(web.blueprint)
+</code></pre></section>
+
+<section>
+<h2>Web UI</h2>
+
+<pre><code>
+# boredbot_deploy/gunicorn.py
+# ... imports ...
+from gunicorn.app import wsgiapp
+
+BOREDBOT_MAIN_OK = True
+def main(args):
+    sys.argv = args
+    wsgiapp.run()
+</code></pre>
+</section>
+
+<section>
+<h2>Commands</h2>
+
+<pre><code>
+$ python -m boredbot_deploy loop
+$ python -m boredbot_deploy gunicorn --bind 0.0.0.0:8000 -w 4 \
+            boredbot_deploy.wsgi:app
+</code></pre>
+</section>
+
+<section>
+<h2>Stage 1 -- Process monitoring</h2>
+</section>
+
+<section>
+<h2>ncolony</h2>
+
+<ul>
+<li class="fragment">twisted-based process monitor</li>
+<li class="fragment">Based off of files in directory</li>
+<li class="fragment">Easy to auto-generate config</li>
+</ul>
+</section>
+
+<section>
+<h2>Monitoring helpers</h2>
+
+<pre><code>
+# luggage/run.py
+# ... imports ...
+def calcCommandline():
+    argv0 = sys.argv[0]
+    if not argv0.endswith('__main__.py'):
+        return [argv0]
+    prefix = os.path.dirname(argv0)
+    path = map(os.path.abspath, sys.path)
+    while prefix not in path:
+        up = os.path.dirname(prefix)
+        if up == prefix:
+            raise RuntimeError('Could not find prefix', argv0)
+        prefix = up
+    module = '.'.join(argv0[len(prefix):].split('/')[1:-1])
+    return [sys.executable, '-m', module]
+</code></pre>
+</section>
+
+<section>
+<h2>Monitoring helpers</h2>
+
+<pre><code>
+# luggage/run.py
+# ... imports ...
+def mkconfig(dirname):
+    place = os.path.abspath(dirname)
+    if os.path.exists(place):
+        shutil.rmtree(place)
+    os.mkdir(place)
+    config = os.path.join(place, 'config')
+    messages = os.path.join(place, 'messages')
+    places = ctllib.Places(config=config, messages=messages)
+    for dr in places:
+        os.mkdir(dr)
+    return places
+</code></pre>
+</section>
+
+<section>
+<h2>Process runner</h2>
+
+<pre><code>
+# boredbot_deploy/start.py
+# ... imports ...
+BOREDBOT_MAIN_OK = True
+def main(args):
+    cmdLine = run.calcCommandline()
+    places = run.mkconfig('boredbot-config')
+    ctllib.add(places, 'boredbot', cmd=cmdLine[0],
+               args=cmdLine[1:] + ['loop'])
+    ctllib.add(places, 'boredweb', cmd=cmdLine[0],
+               args=cmdLine[1:] + ['gunicorn',
+                                   '--bind', '0.0.0.0:8000', '-w', '4',
+                                   'boredbot_deploy.wsgi:app'])
+    sys.argv = ['twistd', '--nodaemon', 'ncolony',
+                '--messages', places.messages,
+                '--config', places.config]
+</code></pre>
+</section>
+
+<section>
+<h2>Stage 2 -- Secure configuration</h2>
+
+<ul>
+<li class="fragment">Censored data...</li>
+<li class="fragment">...uploaded to GitHub.com...</li>
+<li class="fragment">...artifact stores.</li>
+</ul>
+</section>
+
+<section>
+<h2>PyNaCl</h2>
+
+<ul>
+<li class="fragment">Wraps NaCl</li>
+<li class="fragment">Crypto library, secure by default</li>
+</ul>
+</section>
+
+<section>
+<h2>PyNaCl wrapper</h2>
+
+<pre><code>
+# luggage/crypto.py
+# ... imports ...
+def decryptDict(dct, signingPrivateKey,
+                realPrivateKey, realPublicKey):
+    ds = base64.decodestring
+    signingPrivateKey = npublic.PrivateKey(ds(signingPrivateKey))
+    signingPublicKey = signingPrivateKey.public_key
+    realPrivateKey = npublic.PrivateKey(ds(realPrivateKey))
+    # ... defensive programming elided ...
+    box = npublic.Box(realPrivateKey, signingPublicKey)
+    return {key: box.decrypt(ds(value))
+                  for key, value in dct.items()}
+</code></pre>
+</section>
+
+
+<section>
+<h2>PyNaCl wrapper</h2>
+
+<pre><code>
+# luggage/crypto.py
+# ... imports ...
+@attr.s
+class Secrets(object):
+    envVar = attr.ib()
+    encSecrets = attr.ib()
+    signingKey = attr.ib()
+    publicKey = attr.ib()
+    _cache = None
+    def get(self):
+        if self._cache == None:
+            self._cache = decryptDict(self.encSecrets,
+                                      self.signingKey,
+                                      os.environ[self.envVar],
+                                      self.publicKey)
+        return self._cache
+</code></pre>
+</section>
+
+<section>
+<h2>Encrypted secrets</h2>
+
+<pre></code>
+# boredbot_deploy/config.py
+# ... imports ...
+PARSE_APPLICATION_ID = "sYIULJPxHZCryGbqxbNfsXF8PPU4Blf4Ow5b8SFc"
+STATE_APPLICATION_ID = "jcMhpH2gLjin9TK3oQH25Nn4kOG1XQHE8K0WmySL"
+SECRETS = crypto.Secrets(
+    envVar='SECRET_KEY',
+    publicKey="1Wy7uKOcaa5p/5BiMJ82M7v+1c3+SB0DesMTWIj5AxU=",
+    signingKey="p14AmTX3SAR7wdN3+6HHWXdTiYhkMG9XzsztBoxnhr4=",
+    encSecrets=
+        dict(
+            PARSE_REST_API_KEY="a9uodFprEyR4K/xKP7I4lCmafObPac"
+                               "/67+pHGy2So3TzVTZJuLU2oZqt+kBr3"
+                               "pGFvyb/ZMWANaMPkFadXmkv/RlYWeQBO9"
+                               "gBo+/ziTNNjy0=",
+            STATE_REST_API_KEY="wSRKdcA5JbXjXV5/4BIIoiVxrwgbp0DHAiT"
+                               "1O1Qrqa9ACRuytA2yOmo6Je05p/5pRHiKi2V"
+                               "Q/BMXxCRBWrBTOqE+TqG/EWkaRj8vSxQYj4I=",
+        ),
+)
+</code></pre>
+</section>
+
+<section>
+<h2>New loop</h2>
+
+<pre><code>
+# boredbot_deploy/loop.py
+# ... imports ...
+BOREDBOT_MAIN_OK = True
+def main(dummyArgs):
+    headers = parse.getHeaders(config.PARSE_APPLICATION_ID,
+                      config.SECRETS.get()['PARSE_REST_API_KEY'])
+    update.loop(headers)
+</code></pre>
+
+<span class="fragment">wsgi.py changed the same way</span>
+</section>
+
+<section>
+<h2>New start</h2>
+
+<pre><code>
+# boredbot_deploy/start.py
+# ... same as before ...
+    ctllib.add(places, 'boredbot', cmd=cmdLine[0],
+               args=cmdLine[1:] + ['loop'],
+               env=['SECRET_KEY='+os.environ['SECRET_KEY']])
+# And similar change for the web line
+</code></pre>
+</section>
+
+<section>
+<h2>Notes on security</h2>
+
+<ul>
+<li class="fragment">Environment variables vs. files</li>
+<li class="fragment">Encryption vs. O(n) injection</li>
+<li class="fragment">Programmer/DevOps flow</li>
+</ul>
+</code></pre></section>
+
+<section>
+<h2>Stage three -- deployment artifacts</h2>
+
+<ul>
+<li class="fragment">PEX -- Python executable</li>
+<li class="fragment">All dependencies in one file</li>
+</ul>
+</section>
+
+<section>
+
+<pre><code>
+# luggage/buildpex.py
+# ... imports ...
+def buildWheels(buildDir, requirements):
+    wheelhouse = os.path.join(buildDir, 'wheelhouse')
+    if os.path.exists(wheelhouse):
+        shutil.rmtree(wheelhouse)
+    subprocess.check_call(['pip', 'wheel',
+                           '--requirement', requirements,
+                           '--wheel-dir', wheelhouse])
+    subprocess.check_call(['pip', 'wheel', 'setuptools==15.2',
+                           '--wheel-dir', wheelhouse])
+    subprocess.check_call(['pip', 'wheel', '.',
+                           '--wheel-dir', wheelhouse])
+    return wheelhouse
+</code></pre>
+</section>
+
+<section>
+
+<pre><code>
+# luggage/buildpex.py
+# ... imports ...
+def buildPEX(wheelhouse, output, requirements, module, localwheels):
+    if os.path.exists(output):
+        os.remove(output)
+    subprocess.check_call(['pex', '--repo', wheelhouse,
+                           '--no-index', '--output-file', output,
+                           '--disable-cache',
+                           '--requirement', requirements,
+                           '--entry-point', module] + localwheels)
+</code></pre>
+</section>
+
+<section>
+
+<pre><code>
+# boredbot_deploy/mkpex.py
+# ... imports ...
+BOREDBOT_MAIN_OK = True
+def main(dummyArgs):
+    wheelhouse = buildpex.buildWheels('build', 'requirements.txt')
+    buildpex.buildPEX(wheelhouse, 'build/boredbot.pex',
+                     'requirements.txt', 'boredbot_deploy',
+                     ['boredbot'])
+</code></pre>
+</section>
+
+<section>
+<h2>Stages four and five -- isolated build and runtime</h2>
+
+<ul>
+<li class="fragment">Docker -- isolating Linux environments</li>
+<li class="fragment">...not just for deployment</li>
+</ul>
+</section>
+
+<section>
+<pre><code>
+# build.docker
+FROM google/python
+RUN apt-get install -y python-dev libffi-dev
+RUN virtualenv /build
+RUN /build/bin/pip install --upgrade pip
+RUN /build/bin/pip install mainland pex wheel
+RUN /build/bin/pip install requests[security]
+RUN mkdir -p /src/boredbot/
+ADD boredbot/*.py /src/boredbot/
+ADD luggage/*.py /src/luggage/
+ADD boredbot_deploy/*.py /src/boredbot_deploy/
+ADD setup.py /src/
+ADD requirements.txt /src/
+</code></pre>
+</section>
+
+<section>
+<pre><code>
+# run.docker
+FROM google/python
+RUN apt-get install libffi5
+ADD build/boredbot.pex /opt/boredbot/
+EXPOSE 8000
+ENTRYPOINT ["/opt/boredbot/boredbot.pex", "start"]
+</code></pre>
+</section>
+
+<section>
+<pre><code>
+#!/bin/sh
+# create
+TAG=$(git log -1 | head -1 | awk '{print $2}')
+echo $TAG
+mkdir -p build
+rm -f build/boredbot.pex
+docker build -t build-boredbot -f build.docker . 
+docker run --rm -it -v `pwd`/build:/output build-boredbot bash \
+           -c '. ./build/bin/activate; cd src/; \
+               python -m boredbot_deploy mkpex;
+               cp build/boredbot.pex /output'
+docker build -t moshez/boredbot:$TAG -f run.docker .
+docker tag -f moshez/boredbot:$TAG moshez/boredbot:latest
+docker push moshez/boredbot:$TAG moshez/boredbot:latest
+</code></pre>
+</section>
+
+<section>
+<h2>Deployment</h2>
+
+<pre><code>
+$ eval $(docker-machine env MACHINE)
+$ docker rm -f $(docker ps | awk '/moshez.boredbot/ {print $1}')
+$ docker run --env SECRET_KEY=$(cat ../boredbot-secret-key) \
+             -p 8000:8000 moshez/boredbot:latest
+</code></pre>
+</section>
+
+<section>
+<h2>What else?</h2>
+<ul>
+<li class="fragment">PID 1</li>
+<li class="fragment">Separate "constant" vs. "changing" Docker images</li>
+<li class="fragment">Download cache for Python dependencies</li>
+<li class="fragment">Base Docker images on smaller base</li>
+<li class="fragment">Place secret key on "beachhead" image</li>
+</ul>
+</section>
+
+<section>
+<h2>Summary -- what not to do</h2>
+<ul>
+<li class="fragment">Secrets -- not GitHub, not DockerHub</li>
+<li class="fragment">pip install -- not on deploy</li>
+</ul>
+
+</section>
+
+			</div>
+
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.min.js"></script>
+
+		<script>
+
+			// Full list of configuration options available here:
+			// https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				controls: true,
+				progress: true,
+				history: true,
+
+				theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+				transition: Reveal.getQueryHash().transition || 'default', // default/cube/page/concave/zoom/linear/none
+
+				// Optional libraries used to extend on reveal.js
+				dependencies: [
+					{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: 'plugin/markdown/showdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+					{ src: 'plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+					{ src: 'plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
+				]
+			});
+
+		</script>
+
+	</body>
+</html>
