@@ -6,7 +6,7 @@
 
 		<title>BoredBot -- Packaging Python Applications</title>
 		<link rel="stylesheet" href="css/reveal.css">
-		<link rel="stylesheet" href="css/theme/default.css" id="theme">
+		<link rel="stylesheet" href="css/theme/beige.css" id="theme">
 
 		<!-- For syntax highlighting -->
 		<link rel="stylesheet" href="lib/css/zenburn.css">
@@ -29,6 +29,8 @@
 
 <section>
 <h1>Deploying a Bored Robot</h1>
+<h2>Moshe Zadka</h2>
+https://github.com/moshez/boredbot
 </section>
 
 <section>
@@ -41,6 +43,12 @@
     <li>into the middle of a narrative; without preamble.</li>
     </ul>
 </li>
+</ul>
+
+<ul>
+<li class="fragment">boredbot/ -- Core IP!</li>
+<li class="fragment">boredbot_deploy/ -- Configuration</li>
+<li class="fragment">luggage/ -- We really should open source this</li>
 </ul>
 </section>
 
@@ -55,14 +63,7 @@
 
 <section>
 <h2>Updater</h2>
-<ul>
-<li class="fragment">Python script with loop/sleep</li>
-</ul>
-</section>
-
-<section>
-<h2>Updater code</h2>
-<pre class="fragment"><code>
+<pre><code>
 # boredbot/loop.py
 # ... imports ...
 def update(headers):
@@ -78,7 +79,7 @@ def loop(headers):
 
 <section>
 <h2>Web UI</h2>
-<pre class="fragment"><code class="python">
+<pre><code class="python">
 # boredbot/web.py
 # ... imports ...
 blueprint = flask.Blueprint('showbored', __name__)
@@ -450,6 +451,7 @@ def main(dummyArgs):
 </section>
 
 <section>
+<h2>Building the Pex file</h2>
 
 <pre><code>
 # luggage/buildpex.py
@@ -470,6 +472,7 @@ def buildWheels(buildDir, requirements):
 </section>
 
 <section>
+<h2>Building the Pex file</h2>
 
 <pre><code>
 # luggage/buildpex.py
@@ -486,6 +489,7 @@ def buildPEX(wheelhouse, output, requirements, module, localwheels):
 </section>
 
 <section>
+<h2>Building the Pex file</h2>
 
 <pre><code>
 # boredbot_deploy/mkpex.py
@@ -509,6 +513,7 @@ def main(dummyArgs):
 </section>
 
 <section>
+<h2>Builder Dockerfile</h2>
 <pre><code>
 # build.docker
 FROM google/python
@@ -527,6 +532,7 @@ ADD requirements.txt /src/
 </section>
 
 <section>
+<h2>Production Dockerfile</h2>
 <pre><code>
 # run.docker
 FROM google/python
@@ -538,6 +544,7 @@ ENTRYPOINT ["/opt/boredbot/boredbot.pex", "start"]
 </section>
 
 <section>
+<h2>Build script</h2>
 <pre><code>
 #!/bin/sh
 # create
@@ -604,7 +611,7 @@ $ docker run --env SECRET_KEY=$(cat ../boredbot-secret-key) \
 				history: true,
 
 				theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
-				transition: Reveal.getQueryHash().transition || 'default', // default/cube/page/concave/zoom/linear/none
+				transition: Reveal.getQueryHash().transition || 'page', // default/cube/page/concave/zoom/linear/none
 
 				// Optional libraries used to extend on reveal.js
 				dependencies: [
