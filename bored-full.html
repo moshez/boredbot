@@ -79,21 +79,21 @@ def loop(headers):
 
 <section>
 <h2>Web UI</h2>
-<pre><code class="python">
-# boredbot/web.py
+<pre><code class="python"># boredbot/web.py
 # ... imports ...
 blueprint = flask.Blueprint('showbored', __name__)
 @blueprint.route('/')
 def showEntries():
     headers = flask.current_app.config['headers']
     stateHeaders = flask.current_app.config['stateHeaders']
-    lines  = requests.get('https://api.parse.com/1/classes/lines',
+    lines = requests.get('https://api.parse.com/1/classes/lines',
                           headers=headers).json()['results']
-    status, = requests.get('https://api.parse.com/1/classes/current',
-                           headers=stateHeaders).json()['results']
-    output = ['&lt;html>&lt;body>%s&lt;ul>' % status['feeling']]
+    st, = requests.get('https://api.parse.com/1/classes/current',
+                         headers=stateHeaders).json()['results']
+    output = ['&lt;html>&lt;body>%s&lt;ul>' % st['feeling']]
     for line in lines:
-        output.append('&lt;li>%(status)s (%(updatedAt)s)&lt;/li>' % line)
+        output.append('&lt;li>%(status)s (%(updatedAt)s)&lt;/li>' %
+                      line)
     output.append('&lt;/ul>&lt;/body>&lt;html>')
     return '\n'.join(output)
 </code></pre>
