@@ -1,4 +1,0 @@
-Some applications are written to have secrets embedded in their
-source, and do 'pip install' on each machine -- #yolo-devops.
-BoredBot might be bored, but it likes to be installed in a boring
-way that does not cause exciting problems.
