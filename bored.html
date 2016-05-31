@@ -50,10 +50,9 @@
 @blueprint.route('/')
 def showEntries():
     headers = flask.current_app.config['headers']
-    url = 'https://api.parse.com/1/classes/lines'
+    url = 'https://service1.com'
     ret  = requests.get(url, headers=headers).json()
-    lines = ret['results']
-    ## render HTML
+    return renderHTML(ret)
 </code></pre>
 </section>
 
@@ -62,30 +61,29 @@ def showEntries():
 
 <pre><code>
 app = flask.Flask(__name__)
-app.config['headers'] = parse.getHeaders(
-       appID="sYIULJPxHZCryGbqxbNfsXF8PPU4Blf4Ow5b8SFc",
-       restKey="Everyone can see this key")
+headers = dict(restKey="Everyone can see this")
+app.config['headers'] = headers
 app.register_blueprint(web.blueprint)
 </code></pre>
 </section>
 
 <section>
-<h2>Use NaCl</h2>
+<h2>Encrypt secrets</h2>
 
 <pre><code>
 app = flask.Flask(__name__)
-app.config['headers'] = parse.getHeaders(
-       appID="sYIULJPxHZCryGbqxbNfsXF8PPU4Blf4Ow5b8SFc",
-       restKey=decrypt("a9uodFprEyR4K/xKP7I4lCmafObPac/67+"
-                       "pHGy2So3TzVTZJuLU2oZqt+kBr3pGFvyb/"
-                       "ZMWANaMPkFadXmkv/RlYWeQBO9gBo+/ziTNNjy0=",
-                       os.environ['SECRET_KEY'])
+restKey = decrypt("a9uodFprEyR4K/xKP7I4lCmafObPac/67+"
+             "pHGy2So3TzVTZJuLU2oZqt+kBr3pGFvyb/"
+             "ZMWANaMPkFadXmkv/RlYWeQBO9gBo+/ziTNNjy0=",
+                  os.environ['SECRET_KEY'])
+headers = dict(restKey="Everyone can see this")
+app.config['headers'] = headers
 app.register_blueprint(web.blueprint)
 </code></pre>
 </section>
 
 <section>
-<h2>Multiple processes -- use NColony (or Supervisor)</h2>
+<h2>Multiple processes</h2>
 
 <pre><code>
 def main():
@@ -104,7 +102,7 @@ def main():
 </section>
 
 <section>
-<h2>Lots of dependencies -- use Pex</h2>
+<h2>Build</h2>
 
 <pre><code>
 $ pex --output-file boredbot.pex \
@@ -115,7 +113,7 @@ $ pex --output-file boredbot.pex \
 </section>
 
 <section>
-<h2>Preparing for Deployment -- Docker</h2>
+<h2>Containerize</h2>
 
 <pre><code>
 FROM google/python
@@ -127,7 +125,7 @@ ENTRYPOINT ["/opt/boredbot/boredbot.pex", "start"]
 </section>
 
 <section>
-<h2>Tilling with docker-machine</h2>
+<h2>Till</h2>
 
 <pre><code>
 $ docker-machine -D create \
@@ -141,7 +139,7 @@ $ docker-machine -D create \
 </section>
 
 <section>
-<h2>Deploying with docker-machine</h2>
+<h2>Deploy</h2>
 
 <h3>#yolo</h3>
 
@@ -158,9 +156,10 @@ $ docker run --env SECRET_KEY=$(cat ../boredbot-secret-key) \
 <h2>Conclusions</h2>
 
 <ul>
-<li class="fragment">No secrets on [Git|Docker]Hub</li>
-<li class="fragment">Use PEX and Docker to isolate dependencies</li>
-<li class="fragment">Maybe do a little less #yolo? (Kubernetes, Mesos...)</li>
+<li class="fragment">No secrets on *Hub</li>
+<li class="fragment">PEX&amp;Docker for isolation</li>
+<li class="fragment">Files vs. env</li>
+<li class="fragment">Less #YOLO (k8s/mesos/swarm...)</li>
 </ul>
 </section>
 			</div>
