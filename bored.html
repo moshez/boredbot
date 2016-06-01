@@ -77,7 +77,7 @@ restKey = decrypt("a9uodFprEyR4K/xKP7I4lCmafObPac/67+"
              "pHGy2So3TzVTZJuLU2oZqt+kBr3pGFvyb/"
              "ZMWANaMPkFadXmkv/RlYWeQBO9gBo+/ziTNNjy0=",
                   os.environ['SECRET_KEY'])
-headers = dict(restKey="Everyone can see this")
+headers = dict(restKey=restKey)
 app.config['headers'] = headers
 app.register_blueprint(web.blueprint)
 </code></pre>
